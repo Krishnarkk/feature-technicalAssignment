@@ -105,7 +105,7 @@ const PerformanceChart = ({ chartData, metrics, selectedMetrics }) => {
         <div>
           <h3 style={{ margin: 0 }}>Performance Overview</h3>
           <p style={{ margin: 0, color: "#888" }}>
-            Track key metrics over time
+            Key Metrics For Dayparting schedule Peformance Evaluation
           </p>
         </div>
 

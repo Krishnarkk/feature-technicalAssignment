@@ -1,0 +1,51 @@
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+th,
+td {
+  text-align: center;
+  padding: 2px;
+  border: 1px solid #ddd;
+  font-size: 10px;
+}
+
+th {
+  background-color: #f4f4f4;
+}
+
+td {
+  font-weight: normal;
+}
+
+.light-color {
+  background-color: #b79ff9; /* Light color for Impressions */
+}
+
+.dark-color {
+  background-color: #bcabea; /* Dark color for Impressions */
+}
+
+/* For Clicks: Define specific colors based on the range */
+.light-clicks-color {
+  background-color: #ffeaf8; /* Lighter color for Clicks */
+}
+
+.medium-clicks-color {
+  background-color: #ffd9f3; /* Medium color for Clicks */
+}
+
+.dark-clicks-color {
+  background-color: #ffbfeb; /* Darker color for Clicks */
+}
+
+/* For CPM: Lighter color for lower values, darker color for higher values */
+.light-cpm-color {
+  background-color: #90def3; /* Light CPM color */
+}
+
+.dark-cpm-color {
+  background-color: #16abd4; /* Dark CPM color */
+}

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Box, Drawer, Divider, Typography } from "@mui/material";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import logo from "../../assets/logo.jpg";
-
+import menu from "../../assets/Menu.png";
 const Sidebar = () => {
   const [hover, setHover] = useState(false);
 
