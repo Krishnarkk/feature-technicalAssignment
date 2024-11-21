@@ -1,11 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import { login } from "./services/authService";
 import Dashboard from "./components/Dashboard/Dashboard";
 import Login from "./components/auth/Login";
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   // Check if the token exists in sessionStorage to maintain the login state across page refreshes
   useEffect(() => {
@@ -13,6 +19,7 @@ const App = () => {
     if (token) {
       setIsAuthenticated(true);
     }
+    setLoading(false);
   }, []);
 
   // Function to handle login
@@ -29,23 +36,35 @@ const App = () => {
     }
   };
 
-  // Define routes with createBrowserRouter
-  const router = createBrowserRouter([
-    {
-      path: "/login",
-      element: isAuthenticated ? <Navigate to="/dashboard" /> : <Login onLogin={handleLogin} />,
-    },
-    {
-      path: "/dashboard",
-      element: isAuthenticated ? <Dashboard /> : <Navigate to="/login" />,
-    },
-    {
-      path: "*", // Catch-all for unmatched routes (optional)
-      element: <Navigate to="/login" />,
-    },
-  ]);
+  // If app is still loading (i.e. checking authentication status), show loading message
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
-  return <RouterProvider router={router} />;
+  // Retrieve the token from sessionStorage
+  const token = sessionStorage.getItem("token");
+
+  return (
+    <Router>
+      <Routes>
+        <Route path="/login" element={<Login onLogin={handleLogin} />} />
+
+        <Route
+          path="/dashboard"
+          element={
+            isAuthenticated ? (
+              <Dashboard token={token} /> // Pass token to Dashboard as a prop
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
+        />
+
+        {/* Catch-all route for unmatched paths */}
+        <Route path="*" element={<Navigate to="/login" />} />
+      </Routes>
+    </Router>
+  );
 };
 
 export default App;

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   AppBar,
   Toolbar,
@@ -16,13 +16,15 @@ const TopBar = () => {
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null);
 
-  // Retrieve fullName from sessionStorage
   const userDetails = sessionStorage.getItem("userDetails");
   const fName = userDetails ? JSON.parse(userDetails).fullName : "User";
   const userInitial = fName.charAt(0).toUpperCase();
 
   const handleLogout = () => {
+    // Clear session storage
     sessionStorage.clear();
+
+    // Navigate to the login page after clearing session
     navigate("/login");
   };
 
@@ -58,11 +60,7 @@ const TopBar = () => {
       >
         <Typography
           variant="h6"
-          sx={{
-            color: "black",
-            fontSize: "18px",
-            fontWeight: "bold",
-          }}
+          sx={{ color: "black", fontSize: "18px", fontWeight: "bold" }}
         >
           Dashboard
         </Typography>
@@ -73,22 +71,10 @@ const TopBar = () => {
           anchorEl={anchorEl}
           open={Boolean(anchorEl)}
           onClose={handleCloseMenu}
-          anchorOrigin={{
-            vertical: "top",
-            horizontal: "right",
-          }}
-          transformOrigin={{
-            vertical: "top",
-            horizontal: "right",
-          }}
+          anchorOrigin={{ vertical: "top", horizontal: "right" }}
+          transformOrigin={{ vertical: "top", horizontal: "right" }}
         >
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              padding: "10px",
-            }}
-          >
+          <Box sx={{ display: "flex", alignItems: "center", padding: "10px" }}>
             <Box
               sx={{
                 width: "40px",
@@ -105,7 +91,6 @@ const TopBar = () => {
             >
               {userInitial}
             </Box>
-
             <Box sx={{ display: "flex", flexDirection: "column" }}>
               <MenuItem>{fName}</MenuItem>
               <Typography

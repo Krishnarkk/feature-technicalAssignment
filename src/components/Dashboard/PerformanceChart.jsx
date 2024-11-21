@@ -9,17 +9,80 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import MetricsDropdown from "./MetricsDropdown";
 import { Divider } from "@mui/material";
+import MetricsDropdown from "./MetricsDropdown";
 
-const data = [
-  { name: "Jan", uv: 4000, pv: 2400 },
-  { name: "Feb", uv: 3000, pv: 1398 },
-  { name: "Mar", uv: 2000, pv: 9800 },
-  { name: "Apr", uv: 2780, pv: 3908 },
-];
+// Custom tick component for X-Axis to format hours
+const CustomXAxisTick = ({ x, y, payload }) => {
+  const hour = parseInt(payload.value.split(":")[0], 10);
+  // Only show even hours (0Hr, 2Hr, 4Hr, etc.)
+  return hour % 2 === 0 ? (
+    <text
+      x={x}
+      y={y}
+      textAnchor="middle"
+      dominantBaseline="middle"
+      style={{ marginTop: "2px" }}
+    >
+      {`${hour}Hr`}
+    </text>
+  ) : null;
+};
 
-const PerformanceChart = () => {
+const getColorForMetric = (metricName, value) => {
+  // Defining the color gradients
+  const colorGradients = {
+    currency: ["#C2185B", "#9C1A59", "#7D1548", "#5F0F36"],
+    percentage: ["#FFB74D", "#FFA726", "#FF9800", "#FB8C00"],
+  };
+
+  // Defining metrics for each category
+  const currencyMetrics = ["CPC", "CPM", "CPO", "ACOS", "CPA"];
+  const percentageMetrics = ["CTR", "CR_perc", "ACOS"];
+
+  // If the metric is one of the currency metrics
+  if (currencyMetrics.includes(metricName)) {
+    const colorIndex = Math.min(3, Math.floor((value / 10) * 3));
+    return colorGradients.currency[colorIndex];
+  }
+
+  if (percentageMetrics.includes(metricName)) {
+    const colorIndex = Math.min(3, Math.floor((value / 100) * 3));
+    return colorGradients.percentage[colorIndex];
+  }
+
+  // Default color (for other metrics)
+  return "#8884d8";
+};
+
+const PerformanceChart = ({ chartData, metrics, selectedMetrics }) => {
+  const categories = chartData?.result?.categories || [];
+  const series = chartData?.result?.series || [];
+
+  // If selectedMetrics is empty, show all metrics (default behavior)
+  const metricsToDisplay =
+    selectedMetrics.length > 0
+      ? selectedMetrics
+      : series.map((metric) => metric.name);
+
+  // Filter the series to include only the selected metrics
+  const filteredSeries = series.filter((metric) =>
+    metricsToDisplay.includes(metric.name)
+  );
+
+  // Prepare the data for the chart
+  const chartDataFormatted = categories.map((category, index) => {
+    const dataPoint = { name: category };
+    filteredSeries.forEach((metric) => {
+      dataPoint[metric.name] = metric.data[index];
+    });
+    return dataPoint;
+  });
+
+  const formatYAxis = (value) => {
+    return `₹ ${value.toFixed(1)}K`;
+  };
+
   return (
     <div
       style={{
@@ -47,7 +110,10 @@ const PerformanceChart = () => {
         </div>
 
         <div style={{ width: "20%" }}>
-          <MetricsDropdown />
+          <MetricsDropdown
+            metricsData={metrics}
+            selectedMetrics={selectedMetrics}
+          />
         </div>
       </div>
 
@@ -58,14 +124,27 @@ const PerformanceChart = () => {
         height={300}
         style={{ marginTop: "20px" }}
       >
-        <LineChart data={data}>
+        <LineChart data={chartDataFormatted}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
-          <YAxis />
+          {/* X-Axis with custom ticks */}
+          <XAxis
+            dataKey="name"
+            tick={<CustomXAxisTick />}
+            tickLine={true}
+            interval={0}
+          />
+          <YAxis tickFormatter={formatYAxis} />
           <Tooltip />
           <Legend />
-          <Line type="monotone" dataKey="uv" stroke="#8884d8" />
-          <Line type="monotone" dataKey="pv" stroke="#82ca9d" />
+          {filteredSeries.map((metric) => (
+            <Line
+              key={metric.name}
+              type="monotone"
+              dataKey={metric.name}
+              stroke={getColorForMetric(metric.name, metric.data[0])}
+              activeDot={{ r: 8 }}
+            />
+          ))}
         </LineChart>
       </ResponsiveContainer>
     </div>
