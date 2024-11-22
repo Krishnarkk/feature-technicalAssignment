@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   LineChart,
   Line,
@@ -15,7 +15,6 @@ import MetricsDropdown from "./MetricsDropdown";
 // Custom tick component for X-Axis to format hours
 const CustomXAxisTick = ({ x, y, payload }) => {
   const hour = parseInt(payload.value.split(":")[0], 10);
-  // Only show even hours (0Hr, 2Hr, 4Hr, etc.)
   return hour % 2 === 0 ? (
     <text
       x={x}
@@ -30,17 +29,14 @@ const CustomXAxisTick = ({ x, y, payload }) => {
 };
 
 const getColorForMetric = (metricName, value) => {
-  // Defining the color gradients
   const colorGradients = {
     currency: ["#C2185B", "#9C1A59", "#7D1548", "#5F0F36"],
     percentage: ["#FFB74D", "#FFA726", "#FF9800", "#FB8C00"],
   };
 
-  // Defining metrics for each category
   const currencyMetrics = ["CPC", "CPM", "CPO", "ACOS", "CPA"];
   const percentageMetrics = ["CTR", "CR_perc", "ACOS"];
 
-  // If the metric is one of the currency metrics
   if (currencyMetrics.includes(metricName)) {
     const colorIndex = Math.min(3, Math.floor((value / 10) * 3));
     return colorGradients.currency[colorIndex];
@@ -51,7 +47,6 @@ const getColorForMetric = (metricName, value) => {
     return colorGradients.percentage[colorIndex];
   }
 
-  // Default color (for other metrics)
   return "#8884d8";
 };
 
@@ -60,17 +55,17 @@ const PerformanceChart = ({ chartData, metrics }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const categories = chartData?.result?.categories || [];
   const series = chartData?.result?.series || [];
+
   const metricsToDisplay =
     selectedMetrics.length > 0
       ? selectedMetrics
       : series.map((metric) => metric.name);
 
-  // Filter the series to include only the selected metrics
+  // Filter the series based on selected metrics
   const filteredSeries = series.filter((metric) =>
     metricsToDisplay.includes(metric.name)
   );
 
-  // Prepare the data for the chart
   const chartDataFormatted = categories.map((category, index) => {
     const dataPoint = { name: category };
     filteredSeries.forEach((metric) => {
@@ -84,7 +79,12 @@ const PerformanceChart = ({ chartData, metrics }) => {
   };
 
   const handleApply = (newMetrics) => {
-    setSelectedMetrics(newMetrics);
+    // If no metrics are selected, show all metrics (default)
+    if (newMetrics.length === 0) {
+      setSelectedMetrics(series.map((metric) => metric.name));
+    } else {
+      setSelectedMetrics(newMetrics);
+    }
     setIsDropdownOpen(false);
   };
 
@@ -92,6 +92,13 @@ const PerformanceChart = ({ chartData, metrics }) => {
     setIsDropdownOpen(false);
   };
 
+  // Ensure selectedMetrics defaults to all metrics when it's empty
+  useEffect(() => {
+    if (selectedMetrics.length === 0 && series.length > 0) {
+      setSelectedMetrics(series.map((metric) => metric.name));
+    }
+  }, [series, selectedMetrics.length]);
+  console.log(selectedMetrics);
   return (
     <div
       style={{
@@ -131,6 +138,7 @@ const PerformanceChart = ({ chartData, metrics }) => {
       </div>
 
       <Divider width="100%" />
+
       {/* Line Chart */}
       <ResponsiveContainer
         width="100%"
@@ -139,7 +147,6 @@ const PerformanceChart = ({ chartData, metrics }) => {
       >
         <LineChart data={chartDataFormatted}>
           <CartesianGrid strokeDasharray="3 3" />
-          {/* X-Axis with custom ticks */}
           <XAxis
             dataKey="name"
             tick={<CustomXAxisTick />}
