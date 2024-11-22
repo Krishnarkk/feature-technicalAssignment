@@ -1,33 +1,75 @@
 import React, { useState } from "react";
-import { FormControl, InputLabel, Select, MenuItem, Chip } from "@mui/material";
+import {
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Checkbox,
+  ListItemText,
+  Select,
+  Button,
+  Box,
+  Popper,
+} from "@mui/material";
 
-const MetricsDropdown = () => {
-  const [selectedMetrics, setSelectedMetrics] = useState([]);
+const MetricsDropdown = ({
+  metricsData = [],
+  selectedMetrics,
+  onApply,
+  onCancel,
+  isOpen,
+  setIsOpen,
+}) => {
+  const [tempSelectedMetrics, setTempSelectedMetrics] =
+    useState(selectedMetrics);
 
   const handleChange = (event) => {
-    setSelectedMetrics(event.target.value);
+    setTempSelectedMetrics(event.target.value);
+  };
+
+  const handleApply = () => {
+    onApply(tempSelectedMetrics);
+    setIsOpen(false);
+  };
+
+  const handleCancel = () => {
+    setTempSelectedMetrics(selectedMetrics);
+    onCancel();
+    setIsOpen(false);
   };
 
   return (
     <FormControl fullWidth>
-      <InputLabel>Metrics</InputLabel>
-      <Select
-        multiple
-        value={selectedMetrics}
-        onChange={handleChange}
-        renderValue={(selected) => (
-          <div>
-            {selected.map((value) => (
-              <Chip key={value} label={value} sx={{ margin: 0.5 }} />
-            ))}
-          </div>
-        )}
-      >
-        <MenuItem value="Metric 1">Metric 1</MenuItem>
-        <MenuItem value="Metric 2">Metric 2</MenuItem>
-        <MenuItem value="Metric 3">Metric 3</MenuItem>
-        <MenuItem value="Metric 4">Metric 4</MenuItem>
-      </Select>
+      <Box>
+        <InputLabel>Select Metrics</InputLabel>
+        <Select
+          multiple
+          value={tempSelectedMetrics}
+          onChange={handleChange}
+          renderValue={(selected) => selected.join(", ")} // Display selected metrics as a comma-separated list
+          MenuProps={{ PaperProps: { style: { maxHeight: 250 } } }} // To limit dropdown height
+          open={isOpen} // Controlled open state
+          onClose={() => setIsOpen(false)} // Close the dropdown when the user clicks outside
+          onOpen={() => setIsOpen(true)} // Open dropdown when clicked
+          fullWidth // This ensures the Select takes up 100% width of its parent container
+        >
+          {/* Use a fallback if metricsData is undefined */}
+          {(metricsData || []).map((metric) => (
+            <MenuItem key={metric.code} value={metric.code}>
+              <Checkbox
+                checked={tempSelectedMetrics.indexOf(metric.code) > -1}
+              />
+              <ListItemText primary={metric.label} />
+            </MenuItem>
+          ))}
+          {/* Buttons to Apply or Cancel */}
+          <Button variant="outlined" onClick={handleCancel}>
+            Cancel
+          </Button>
+          <Button variant="contained" color="primary" onClick={handleApply}>
+            Apply
+          </Button>
+        </Select>
+      </Box>
     </FormControl>
   );
 };

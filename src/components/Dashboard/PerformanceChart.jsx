@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   LineChart,
   Line,
@@ -55,11 +55,11 @@ const getColorForMetric = (metricName, value) => {
   return "#8884d8";
 };
 
-const PerformanceChart = ({ chartData, metrics, selectedMetrics }) => {
+const PerformanceChart = ({ chartData, metrics }) => {
+  const [selectedMetrics, setSelectedMetrics] = useState([]);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const categories = chartData?.result?.categories || [];
   const series = chartData?.result?.series || [];
-
-  // If selectedMetrics is empty, show all metrics (default behavior)
   const metricsToDisplay =
     selectedMetrics.length > 0
       ? selectedMetrics
@@ -81,6 +81,15 @@ const PerformanceChart = ({ chartData, metrics, selectedMetrics }) => {
 
   const formatYAxis = (value) => {
     return `₹ ${value.toFixed(1)}K`;
+  };
+
+  const handleApply = (newMetrics) => {
+    setSelectedMetrics(newMetrics);
+    setIsDropdownOpen(false);
+  };
+
+  const handleCancel = () => {
+    setIsDropdownOpen(false);
   };
 
   return (
@@ -105,14 +114,18 @@ const PerformanceChart = ({ chartData, metrics, selectedMetrics }) => {
         <div>
           <h3 style={{ margin: 0 }}>Performance Overview</h3>
           <p style={{ margin: 0, color: "#888" }}>
-            Key Metrics For Dayparting schedule Peformance Evaluation
+            Key Metrics For Dayparting schedule Performance Evaluation
           </p>
         </div>
 
         <div style={{ width: "20%" }}>
           <MetricsDropdown
-            metricsData={metrics}
+            metricsData={metrics.result}
             selectedMetrics={selectedMetrics}
+            onApply={handleApply}
+            onCancel={handleCancel}
+            isOpen={isDropdownOpen}
+            setIsOpen={setIsDropdownOpen}
           />
         </div>
       </div>
