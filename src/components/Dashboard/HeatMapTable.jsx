@@ -1,6 +1,6 @@
 import React from "react";
 import "./HeatMapTable.css";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, CircularProgress } from "@mui/material";
 
 // Define the time range for the table rows (12 AM to 11 PM)
 const times = [
@@ -47,7 +47,6 @@ const generateColorClass = (value, min, max, metricType) => {
       }
     }
   } else if (metricType === "CPM") {
-    // For CPM: Lighter color for lower values, darker color for higher values
     return percentage < 0.5 ? "light-cpm-color" : "dark-cpm-color";
   }
 
@@ -56,20 +55,29 @@ const generateColorClass = (value, min, max, metricType) => {
 
 const HeatMapTable = ({ data }) => {
   if (!data || !data.result) {
-    return <div>Loading </div>;
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+          flexDirection: "column",
+        }}
+      >
+        <CircularProgress size={50} />
+        <Typography variant="body1" sx={{ marginTop: "10px" }}>
+          Loading HeatMap table Data...
+        </Typography>
+      </Box>
+    );
   }
 
   const calculateMetrics = (hourData) => {
     const CPC = hourData.CPC || 0;
     const CR_perc = hourData.CR_perc || 0;
-
-    // Calculate Clicks dynamically (use actual clicks data here if available)
-    const clicks = 1000;
-
-    // Calculate Impressions based on Conversion Rate and Clicks
+    const clicks = 1000; //assuming clicks for calculation
     const impressions = clicks / (CR_perc / 100) || 0;
-
-    // Calculate CPM (Cost Per Thousand Impressions)
     const cost = CPC * clicks;
     const cpm = (cost / impressions) * 1000;
 
@@ -88,11 +96,9 @@ const HeatMapTable = ({ data }) => {
                   (entry) => entry.time_part.slice(0, 5) === time
                 );
 
-                // If no data for this time slot, return "N/A"
                 if (!hourlyData)
                   return <td key={`${metricKey}-${dayData.weekday}`}>N/A</td>;
 
-                // Calculate metrics for Impressions, Clicks, and CPM
                 const { impressions, clicks, cpm } =
                   calculateMetrics(hourlyData);
 
@@ -138,19 +144,19 @@ const HeatMapTable = ({ data }) => {
   };
 
   return (
-    <Box boxShadow={3} sx={{padding:"15px"}}>
-    <Typography variant="h6">Heat Map</Typography>
-    <Typography variant="body2">Select hours to schedule Dayparting</Typography>
+    <Box boxShadow={3} sx={{ padding: "15px" }}>
+      <Typography variant="h5">Heat Map</Typography>
+      <Typography variant="body2">
+        Select hours to schedule Dayparting
+      </Typography>
       <table>
         <thead>
           <tr>
             <th>Time</th>
             {data.result.map((dayData) => (
-              <>
-                <th colSpan={3} key={dayData.weekday}>
-                  {dayData.weekday}
-                </th>
-              </>
+              <th colSpan={3} key={dayData.weekday}>
+                {dayData.weekday}
+              </th>
             ))}
           </tr>
           <tr>

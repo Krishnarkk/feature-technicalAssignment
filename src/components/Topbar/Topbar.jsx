@@ -10,6 +10,7 @@ import {
   Box,
 } from "@mui/material";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import { useNavigate } from "react-router-dom";
 
 const TopBar = () => {
@@ -21,10 +22,7 @@ const TopBar = () => {
   const userInitial = fName.charAt(0).toUpperCase();
 
   const handleLogout = () => {
-    // Clear session storage
     sessionStorage.clear();
-
-    // Navigate to the login page after clearing session
     navigate("/login");
   };
 
@@ -102,7 +100,10 @@ const TopBar = () => {
             </Box>
           </Box>
           <Divider />
-          <MenuItem onClick={handleLogout}>Logout</MenuItem>
+          <MenuItem onClick={handleLogout}>
+            <ExitToAppIcon className="topbar-logout-icon" />
+            Logout
+          </MenuItem>
         </Menu>
       </Toolbar>
     </AppBar>

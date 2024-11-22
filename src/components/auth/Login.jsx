@@ -1,28 +1,42 @@
 import React, { useState } from "react";
-import { TextField, Button, Typography, Box, Container, Checkbox, FormControlLabel, InputAdornment } from "@mui/material";
+import {
+  TextField,
+  Button,
+  Typography,
+  Box,
+  Container,
+  Checkbox,
+  FormControlLabel,
+  InputAdornment,
+  CircularProgress,
+} from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { login } from "../../services/authService";
 import EmailIcon from "@mui/icons-material/Email";
 import LockIcon from "@mui/icons-material/Lock";
 import { Link } from "react-router-dom";
-import "./Login.css"; // Importing the CSS file
+import logoImage from "../../assets/Group.png";
+import "./Login.css";
 
-const Login = ({ onLogin }) => {  // onLogin function passed as a prop from App.js
+const Login = ({ onLogin }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [rememberMe, setRememberMe] = useState(false); // State for Remember Me checkbox
+  const [rememberMe, setRememberMe] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
+    setIsLoading(true);
 
     try {
-      await onLogin(email, password);  // Pass the credentials to onLogin passed from App.js
+      await onLogin(email, password);
       navigate("/dashboard");
     } catch (error) {
       setError("Invalid credentials or server error");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -31,12 +45,11 @@ const Login = ({ onLogin }) => {  // onLogin function passed as a prop from App.
   };
 
   return (
-    <div className="login-page-wrapper">
-      <Typography className="login-logo" variant="h3">TECHSAVVY</Typography>
-
+    <div className="loginpage_wrapper">
+      <img src={logoImage} alt="TechSavvy Logo" />
       <Container maxWidth="xs">
-        <Box className="form-container" sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <form onSubmit={handleLogin} style={{ width: "100%" }}>
+        <Box className="form_container">
+          <form onSubmit={handleLogin}>
             <Typography variant="h5" align="center" gutterBottom>
               Welcome Back!
             </Typography>
@@ -74,7 +87,10 @@ const Login = ({ onLogin }) => {  // onLogin function passed as a prop from App.
                 ),
                 endAdornment: (
                   <InputAdornment position="end">
-                    <Link to="/forgot-password" style={{ textDecoration: "none" }}>
+                    <Link
+                      to="/forgot-password"
+                      style={{ textDecoration: "none" }}
+                    >
                       <Typography variant="body2" color="error">
                         Forgot Password?
                       </Typography>
@@ -85,28 +101,42 @@ const Login = ({ onLogin }) => {  // onLogin function passed as a prop from App.
             />
 
             {error && (
-              <Typography color="error" variant="body2" align="center" className="error-message">
+              <Typography
+                color="error"
+                variant="body2"
+                align="center"
+                className="error_message"
+              >
                 {error}
               </Typography>
             )}
 
             <FormControlLabel
-              control={<Checkbox checked={rememberMe} onChange={handleRememberMe} color="primary" />}
+              control={
+                <Checkbox
+                  checked={rememberMe}
+                  onChange={handleRememberMe}
+                  color="primary"
+                />
+              }
               label="Remember Me"
-              sx={{ marginTop: 1 }}
-              className="remember-me-container"
+              className="rememberme_container"
             />
 
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              fullWidth
-              sx={{ marginTop: 2 }}
-              className="submit-button"
-            >
-              SIGN IN
-            </Button>
+            {isLoading ? (
+              <Box className="loader_overlay">
+                <CircularProgress size={50} />
+              </Box>
+            ) : (
+              <Button
+                type="submit"
+                variant="contained"
+                fullWidth
+                className="submit_button"
+              >
+                SIGN IN
+              </Button>
+            )}
           </form>
         </Box>
       </Container>

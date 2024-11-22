@@ -8,6 +8,8 @@ import {
 import { login } from "./services/authService";
 import Dashboard from "./components/Dashboard/Dashboard";
 import Login from "./components/auth/Login";
+import ErrorBoundaryPage from "./components/ErrorBoundaryPage";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -36,33 +38,30 @@ const App = () => {
     }
   };
 
-  // If app is still loading (i.e. checking authentication status), show loading message
   if (loading) {
     return <div>Loading...</div>;
   }
 
-  // Retrieve the token from sessionStorage
   const token = sessionStorage.getItem("token");
 
   return (
     <Router>
-      <Routes>
-        <Route path="/login" element={<Login onLogin={handleLogin} />} />
-
-        <Route
-          path="/dashboard"
-          element={
-            isAuthenticated ? (
-              <Dashboard token={token} /> // Pass token to Dashboard as a prop
-            ) : (
-              <Navigate to="/login" />
-            )
-          }
-        />
-
-        {/* Catch-all route for unmatched paths */}
-        <Route path="*" element={<Navigate to="/login" />} />
-      </Routes>
+      <ErrorBoundary>
+        <Routes>
+          <Route path="/login" element={<Login onLogin={handleLogin} />} />
+          <Route
+            path="/dashboard"
+            element={
+              isAuthenticated ? (
+                <Dashboard token={token} />
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
+          />
+          <Route path="*" element={<ErrorBoundaryPage />} />
+        </Routes>
+      </ErrorBoundary>
     </Router>
   );
 };
